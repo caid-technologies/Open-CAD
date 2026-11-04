@@ -1,0 +1,42 @@
+name: Portable design workflow
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  installed-document:
+    name: Installed core document (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: astral-sh/setup-uv@v5
+      - name: Build the core wheel
+        run: uv build --package opencad --wheel --out-dir dist-document
+      - name: Create isolated installed-package environment
+        run: uv venv --python 3.11 .venv-document
+      - name: Install the built wheel with native geometry
+        run: python -c "import glob, subprocess; subprocess.check_call(['uv', 'pip', 'install', '--python', '.venv-document', '-c', 'scripts/occt-constraints.txt', glob.glob('dist-document/*.whl')[0] + '[occt]', 'pytest>=8,<10'])"
+      - name: Check SDK contracts and portable source integrity
+        run: uv run --no-project --python .venv-document python -m pytest packages/opencad/tests/runtime/test_document_contract.py -q
+      - name: Check real cold-process editing and CAD export without skips
+        run: uv run --no-project --python .venv-document python scripts/test_occt.py -k design_document --junitxml=test-results/design-document.xml
+      - name: Preserve native verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: design-document-${{ matrix.os }}
+          path: test-results/

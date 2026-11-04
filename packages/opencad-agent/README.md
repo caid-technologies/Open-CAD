@@ -1,5 +1,7 @@
 # opencad-agent
 
+Requires Python **3.11 or newer**.
+
 Natural-language CAD modelling on top of the [`opencad`](../opencad) core.
 
 The agent generates OpenCAD Python, validates it against an isolated analytic

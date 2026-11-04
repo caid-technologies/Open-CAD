@@ -1,5 +1,7 @@
 # opencad
 
+Requires Python **3.11 or newer**.
+
 The OpenCAD core: geometry kernel, constraint solver, feature tree, and the
 fluent modelling API — with no web framework and no network dependency.
 

@@ -20,6 +20,11 @@ from opencad.design_artifact import (
     validate_design_artifact_payload,
     validate_design_patch_payload,
 )
+from opencad.document import (
+    DesignDocument, DesignReference, OperationParameterBinding, ReviewReceipt,
+    check_design_reference, edit_design_document, export_design_document,
+    load_design_document, rebuild_design_document, review_design_document,
+)
 from opencad.kinematics import (
     clamp_progress,
     compose_transforms,
@@ -86,6 +91,16 @@ __all__ = [
     "use_default_context",
     "main",
     "__version__",
+    "DesignDocument",
+    "DesignReference",
+    "OperationParameterBinding",
+    "ReviewReceipt",
+    "check_design_reference",
+    "edit_design_document",
+    "export_design_document",
+    "load_design_document",
+    "rebuild_design_document",
+    "review_design_document",
     "DesignArtifact",
     "DesignParameter",
     "DesignPatch",

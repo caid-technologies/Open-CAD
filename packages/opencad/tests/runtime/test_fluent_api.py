@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from opencad import Part, Sketch, get_default_context, reset_default_context
+from opencad import Part, Sketch, RuntimeContext, get_default_context, reset_default_context, set_default_context
 
 
 def test_fluent_sketch_extrude_fillet_rejects_analytic_step_export(tmp_path: Path) -> None:
