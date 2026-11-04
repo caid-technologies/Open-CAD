@@ -1,5 +1,7 @@
 # opencad-backend
 
+Requires Python **3.11 or newer**.
+
 FastAPI transport over the OpenCAD core. This is the only distribution in the
 repository that depends on a web framework — `opencad` and `opencad-agent`
 carry no FastAPI, Starlette, httpx, or uvicorn.

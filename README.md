@@ -5,7 +5,7 @@ A modular CAD system for parametric, programmable, and AI-assisted design
 [![opencad](https://img.shields.io/pypi/v/opencad?label=opencad)](https://pypi.org/project/opencad/)
 [![opencad-agent](https://img.shields.io/pypi/v/opencad-agent?label=opencad-agent)](https://pypi.org/project/opencad-agent/)
 [![opencad-backend](https://img.shields.io/pypi/v/opencad-backend?label=opencad-backend)](https://pypi.org/project/opencad-backend/)
-[![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://pypi.org/project/opencad/)
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue)](https://pypi.org/project/opencad/)
 [![opencad-viewport](https://img.shields.io/npm/v/opencad-viewport?label=opencad-viewport&logo=npm)](https://www.npmjs.com/package/opencad-viewport)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 
