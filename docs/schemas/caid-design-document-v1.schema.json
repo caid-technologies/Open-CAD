@@ -1,0 +1,710 @@
+{
+  "$defs": {
+    "DesignArtifact": {
+      "properties": {
+        "artifact_id": {
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "feature_tree": {
+          "$ref": "#/$defs/FeatureTree"
+        },
+        "kinematic_joints": {
+          "items": {
+            "$ref": "#/$defs/KinematicJoint"
+          },
+          "title": "Kinematic Joints",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": {
+            "$ref": "#/$defs/DesignParameter"
+          },
+          "title": "Parameters",
+          "type": "object"
+        },
+        "producer": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Producer",
+          "type": "object"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "simulation_tags": {
+          "items": {
+            "$ref": "#/$defs/SimulationTag"
+          },
+          "title": "Simulation Tags",
+          "type": "array"
+        }
+      },
+      "required": [
+        "artifact_id",
+        "feature_tree"
+      ],
+      "title": "DesignArtifact",
+      "type": "object"
+    },
+    "DesignParameter": {
+      "properties": {
+        "feature_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Feature Id"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "role": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Role"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "name",
+        "value"
+      ],
+      "title": "DesignParameter",
+      "type": "object"
+    },
+    "FeatureNode": {
+      "properties": {
+        "depends_on": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Depends On",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "is_assembly_mate": {
+          "default": false,
+          "title": "Is Assembly Mate",
+          "type": "boolean"
+        },
+        "mate_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mate Id"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "operation": {
+          "title": "Operation",
+          "type": "string"
+        },
+        "parameter_bindings": {
+          "items": {
+            "$ref": "#/$defs/ParameterBinding"
+          },
+          "title": "Parameter Bindings",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "parent_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parent Id"
+        },
+        "rebuild_error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rebuild Error"
+        },
+        "replay_shape_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Replay Shape Id"
+        },
+        "shape_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Shape Id"
+        },
+        "sketch_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sketch Id"
+        },
+        "status": {
+          "default": "pending",
+          "enum": [
+            "pending",
+            "built",
+            "failed",
+            "stale",
+            "suppressed"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "suppressed": {
+          "default": false,
+          "title": "Suppressed",
+          "type": "boolean"
+        },
+        "tool_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tool Refs",
+          "type": "array"
+        },
+        "typed_parameters": {
+          "additionalProperties": {
+            "$ref": "#/$defs/TypedParameter"
+          },
+          "title": "Typed Parameters",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "operation"
+      ],
+      "title": "FeatureNode",
+      "type": "object"
+    },
+    "FeatureTree": {
+      "properties": {
+        "active_branch": {
+          "default": "main",
+          "title": "Active Branch",
+          "type": "string"
+        },
+        "branch_snapshots": {
+          "additionalProperties": {
+            "additionalProperties": {
+              "$ref": "#/$defs/FeatureNode"
+            },
+            "type": "object"
+          },
+          "title": "Branch Snapshots",
+          "type": "object"
+        },
+        "kernel_session_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kernel Session Id"
+        },
+        "nodes": {
+          "additionalProperties": {
+            "$ref": "#/$defs/FeatureNode"
+          },
+          "title": "Nodes",
+          "type": "object"
+        },
+        "revision": {
+          "default": 0,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "root_id": {
+          "title": "Root Id",
+          "type": "string"
+        },
+        "solver_cache": {
+          "additionalProperties": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Solver Cache",
+          "type": "object"
+        }
+      },
+      "required": [
+        "root_id"
+      ],
+      "title": "FeatureTree",
+      "type": "object"
+    },
+    "JointUnit": {
+      "enum": [
+        "none",
+        "radian",
+        "mm"
+      ],
+      "title": "JointUnit",
+      "type": "string"
+    },
+    "KinematicJoint": {
+      "description": "A rigid degree-of-freedom relationship between two shape occurrences.\n\nRevolute limits are radians. Prismatic limits are millimeters. Shape IDs\nact as occurrence IDs in this first contract; a future assembly-occurrence\nlayer can replace them without changing pose evaluation.",
+      "properties": {
+        "axis": {
+          "default": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Axis",
+          "type": "array"
+        },
+        "child_shape_id": {
+          "minLength": 1,
+          "title": "Child Shape Id",
+          "type": "string"
+        },
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
+        "lower_limit": {
+          "default": 0.0,
+          "title": "Lower Limit",
+          "type": "number"
+        },
+        "metadata": {
+          "additionalProperties": true,
+          "title": "Metadata",
+          "type": "object"
+        },
+        "origin_mm": {
+          "default": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Origin Mm",
+          "type": "array"
+        },
+        "parent_shape_id": {
+          "minLength": 1,
+          "title": "Parent Shape Id",
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/KinematicJointType"
+        },
+        "unit": {
+          "$ref": "#/$defs/JointUnit",
+          "default": "none"
+        },
+        "upper_limit": {
+          "default": 0.0,
+          "title": "Upper Limit",
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "parent_shape_id",
+        "child_shape_id"
+      ],
+      "title": "KinematicJoint",
+      "type": "object"
+    },
+    "KinematicJointType": {
+      "enum": [
+        "fixed",
+        "revolute",
+        "prismatic"
+      ],
+      "title": "KinematicJointType",
+      "type": "string"
+    },
+    "OperationParameterBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "feature_id": {
+          "minLength": 1,
+          "title": "Feature Id",
+          "type": "string"
+        },
+        "field": {
+          "minLength": 1,
+          "title": "Field",
+          "type": "string"
+        }
+      },
+      "required": [
+        "feature_id",
+        "field"
+      ],
+      "title": "OperationParameterBinding",
+      "type": "object"
+    },
+    "ParameterBinding": {
+      "properties": {
+        "cast_as": {
+          "anyOf": [
+            {
+              "enum": [
+                "int",
+                "float",
+                "bool",
+                "string",
+                "shape_ref",
+                "json"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cast As"
+        },
+        "expression": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expression"
+        },
+        "parameter": {
+          "title": "Parameter",
+          "type": "string"
+        },
+        "source": {
+          "enum": [
+            "solver",
+            "node"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "source_key": {
+          "title": "Source Key",
+          "type": "string"
+        },
+        "source_path": {
+          "title": "Source Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "parameter",
+        "source",
+        "source_key",
+        "source_path"
+      ],
+      "title": "ParameterBinding",
+      "type": "object"
+    },
+    "ReviewReceipt": {
+      "additionalProperties": false,
+      "description": "Caller-declared engineering decision; reviewer identity is not authenticated.",
+      "properties": {
+        "content_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Content Sha256",
+          "type": "string"
+        },
+        "decision": {
+          "enum": [
+            "accepted",
+            "rejected"
+          ],
+          "title": "Decision",
+          "type": "string"
+        },
+        "note": {
+          "minLength": 1,
+          "title": "Note",
+          "type": "string"
+        },
+        "reviewer": {
+          "minLength": 1,
+          "title": "Reviewer",
+          "type": "string"
+        }
+      },
+      "required": [
+        "content_sha256",
+        "reviewer",
+        "decision",
+        "note"
+      ],
+      "title": "ReviewReceipt",
+      "type": "object"
+    },
+    "SimulationTag": {
+      "properties": {
+        "kind": {
+          "enum": [
+            "body",
+            "joint",
+            "geom",
+            "site",
+            "parameter"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "metadata": {
+          "additionalProperties": true,
+          "title": "Metadata",
+          "type": "object"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "target": {
+          "title": "Target",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "kind",
+        "target"
+      ],
+      "title": "SimulationTag",
+      "type": "object"
+    },
+    "TypedParameter": {
+      "properties": {
+        "type": {
+          "enum": [
+            "int",
+            "float",
+            "bool",
+            "string",
+            "shape_ref",
+            "json"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "value": {
+          "default": null,
+          "title": "Value"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "TypedParameter",
+      "type": "object"
+    }
+  },
+  "$id": "https://caid-technologies.com/schemas/caid-design-document-v1.schema.json",
+  "additionalProperties": false,
+  "properties": {
+    "artifact": {
+      "$ref": "#/$defs/DesignArtifact"
+    },
+    "bindings": {
+      "additionalProperties": {
+        "$ref": "#/$defs/OperationParameterBinding"
+      },
+      "title": "Bindings",
+      "type": "object"
+    },
+    "content_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Content Sha256",
+      "type": "string"
+    },
+    "format": {
+      "const": "caid.design-document",
+      "default": "caid.design-document",
+      "title": "Format",
+      "type": "string"
+    },
+    "parent_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Parent Sha256"
+    },
+    "review": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ReviewReceipt"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "revision": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "artifact",
+    "content_sha256"
+  ],
+  "title": "DesignDocument",
+  "type": "object"
+}

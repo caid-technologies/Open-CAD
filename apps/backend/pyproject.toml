@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "opencad-backend"
-version = "0.2.3"
+version = "0.2.5"
 description = "OpenCAD HTTP backend — FastAPI transport over the OpenCAD core and agent"
 readme = "README.md"
 license = "Apache-2.0"
@@ -24,8 +24,8 @@ classifiers = [
 ]
 # The only place FastAPI, httpx, and uvicorn are allowed.
 dependencies = [
-  "opencad==0.2.3",
-  "opencad-agent[llm]==0.2.3",
+  "opencad==0.2.5",
+  "opencad-agent[llm]==0.2.5",
   "fastapi>=0.100",
   "httpx>=0.27",
   "python-dotenv>=1.0",

@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import argparse
+import importlib
+from contextlib import contextmanager
+import json
 import runpy
 import sys
 from pathlib import Path
@@ -59,7 +62,91 @@ def _build_parser() -> argparse.ArgumentParser:
     _add_backend_argument(run_parser)
     run_parser.set_defaults(func=_cmd_run)
 
+    document_parser = subparsers.add_parser("document", help="Inspect, revise, review, and export portable design documents")
+    commands = document_parser.add_subparsers(dest="document_command", required=True)
+    schema = commands.add_parser("schema", help="Print the portable design document JSON Schema")
+    schema.set_defaults(func=_cmd_document)
+    create = commands.add_parser("create", help="Wrap an existing CAID v1 artifact with explicit operation bindings")
+    create.add_argument("artifact")
+    create.add_argument("--bindings", required=True, help="JSON file mapping parameter names to feature_id and field")
+    create.add_argument("--output", required=True)
+    create.set_defaults(func=_cmd_document)
+    inspect = commands.add_parser("inspect", help="Validate integrity and inspect source metadata")
+    inspect.add_argument("document")
+    inspect.add_argument("--reference", help="Check a saved revision-pinned DesignReference JSON")
+    inspect.set_defaults(func=_cmd_document)
+    edit = commands.add_parser("edit", help="Revise explicitly bound operation parameters")
+    edit.add_argument("document")
+    edit.add_argument("--values", required=True, help="JSON file containing named parameter values")
+    edit.add_argument("--expected-sha256", required=True)
+    edit.add_argument("--output", required=True)
+    edit.set_defaults(func=_cmd_document)
+    review = commands.add_parser("review", help="Record a caller-declared human decision for this exact revision")
+    review.add_argument("document")
+    review.add_argument("--reviewer", required=True)
+    review.add_argument("--decision", required=True, choices=["accepted", "rejected"])
+    review.add_argument("--note", required=True)
+    review.add_argument("--output", required=True)
+    review.set_defaults(func=_cmd_document)
+    export = commands.add_parser("export", help="Cold-rebuild and atomically export native STEP or STL")
+    export.add_argument("document")
+    export.add_argument("--feature", required=True)
+    export.add_argument("--output", required=True)
+    export.set_defaults(func=_cmd_document)
     return parser
+
+
+def _cmd_document(args: argparse.Namespace) -> int:
+    from opencad.design_artifact import load_design_artifact
+    from opencad.document import (
+        DesignDocument, check_design_reference, edit_design_document,
+        export_design_document, load_design_document, review_design_document,
+    )
+
+    try:
+        action = args.document_command
+        if action == "schema":
+            result = DesignDocument.model_json_schema()
+        elif action == "create":
+            document = DesignDocument.create(
+                artifact=load_design_artifact(args.artifact),
+                bindings=json.loads(Path(args.bindings).read_text(encoding="utf-8")))
+            document.write_json(args.output)
+            result = {"content_sha256": document.content_sha256, "revision": document.revision}
+        else:
+            document = load_design_document(args.document)
+            if action == "inspect":
+                result = {"artifact_id": document.artifact.artifact_id, "revision": document.revision,
+                          "content_sha256": document.content_sha256, "parent_sha256": document.parent_sha256,
+                          "bindings": {key: value.model_dump() for key, value in document.bindings.items()},
+                          "review_status": document.review_status,
+                          "feature_ids": list(document.artifact.feature_tree.nodes)}
+                if args.reference:
+                    result["reference_status"] = check_design_reference(
+                        document, json.loads(Path(args.reference).read_text(encoding="utf-8")))
+                    if result["reference_status"] != "current":
+                        print(json.dumps(result, sort_keys=True))
+                        return 1
+            elif action == "edit":
+                values = json.loads(Path(args.values).read_text(encoding="utf-8"))
+                if not isinstance(values, dict):
+                    raise ValueError("Named parameter values must be a JSON object.")
+                updated = edit_design_document(document, values, expected_sha256=args.expected_sha256)
+                updated.write_json(args.output)
+                result = {"content_sha256": updated.content_sha256, "revision": updated.revision,
+                          "parent_sha256": updated.parent_sha256, "review_status": updated.review_status}
+            elif action == "review":
+                updated = review_design_document(document, reviewer=args.reviewer,
+                    decision=args.decision, note=args.note)
+                updated.write_json(args.output)
+                result = {"content_sha256": updated.content_sha256, "review_status": updated.review_status}
+            else:
+                result = export_design_document(document, args.output, feature_id=args.feature)
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0
+    except (ValueError, OSError, RuntimeError) as exc:
+        print(json.dumps({"error": str(exc)}, sort_keys=True), file=sys.stderr)
+        return 1
 
 
 def _add_turntable_arguments(parser: argparse.ArgumentParser) -> None:
@@ -131,6 +218,36 @@ def _cmd_build(args: argparse.Namespace) -> int:
     return 0
 
 
+@contextmanager
+def _script_import_scope(directory: Path):
+    """Resolve sibling imports from this model during repeated in-process runs.
+
+    A previous model may have loaded a package with the same name. Preserve the
+    host's modules and search path, rather than reusing that unrelated source or
+    leaving this model's imports in later builds.
+    """
+    names = {path.stem if path.is_file() else path.name for path in directory.iterdir()
+             if (path.is_dir() or path.suffix == ".py")}
+    names = {name for name in names if name.isidentifier()}
+    def belongs(name):
+        return name.partition(".")[0] in names
+    saved = {name: module for name, module in list(sys.modules.items()) if belongs(name)}
+    previous_path = list(sys.path)
+    for name in saved:
+        sys.modules.pop(name, None)
+    sys.path.insert(0, str(directory))
+    importlib.invalidate_caches()
+    try:
+        yield
+    finally:
+        for name in list(sys.modules):
+            if belongs(name):
+                sys.modules.pop(name, None)
+        sys.modules.update(saved)
+        sys.path[:] = previous_path
+        importlib.invalidate_caches()
+
+
 def _cmd_run(args: argparse.Namespace) -> int:
     export_format = _export_format(args.export) if args.export else None
 
@@ -156,15 +273,8 @@ def _cmd_run(args: argparse.Namespace) -> int:
     if not script_path.exists():
         raise FileNotFoundError(f"Script not found: {script_path}")
 
-    script_directory = str(script_path.resolve().parent)
-    added_script_directory = script_directory not in sys.path
-    if added_script_directory:
-        sys.path.insert(0, script_directory)
-    try:
+    with _script_import_scope(script_path.resolve().parent):
         runpy.run_path(str(script_path), run_name="__main__")
-    finally:
-        if added_script_directory:
-            sys.path.remove(script_directory)
 
     current = get_default_context()
     if args.export:

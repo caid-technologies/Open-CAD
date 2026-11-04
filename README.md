@@ -112,7 +112,7 @@ plate.fillet(edges="all", radius=1.0)
 ```
 
 Cross-package versions move in lockstep and are pinned exactly, so
-`opencad-agent 0.2.3` can only resolve against `opencad 0.2.3`.
+`opencad-agent 0.2.5` resolves against `opencad 0.2.5`.
 
 The React components ship separately on npm:
 
@@ -300,6 +300,22 @@ part.export("output.step")
 
 Every fluent call appends a built `FeatureNode` to the in-memory DAG, so headless runs are recoverable.
 Fluent sketches also persist `entities` + `profile_order` metadata in the sketch node, matching agent-path ordering semantics for deterministic profile reconstruction.
+
+## Portable design workflow
+
+Use the [portable design document](docs/DESIGN_DOCUMENT.md) to inspect and edit
+named dimensions, save immutable revisions, reopen source in a fresh process,
+and export real STEP/STL through the same Python and CLI functions. Explicit
+bindings connect parameters to kernel operations; checksums detect source
+changes, reference pins expose stale revisions, and human review declarations
+remain separate from automated checks. The installed-wheel CI gate exercises
+real source editing and native export on Linux and Windows.
+
+```bash
+opencad document schema
+opencad document inspect design.json
+opencad document export design.json --feature feat-0001 --output part.step
+```
 
 ## CAID Design Artifact
 

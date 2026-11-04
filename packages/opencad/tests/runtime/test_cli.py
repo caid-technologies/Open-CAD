@@ -152,3 +152,22 @@ def test_cli_rejects_unknown_export_extension(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match=".step, .stp, or .stl"):
         main(["run", str(script_path), "--export", str(tmp_path / "result.obj")])
+
+
+def test_repeated_cli_runs_use_their_own_sibling_source(tmp_path):
+    from opencad import get_default_context
+    import sys
+    previous = {key: value for key, value in sys.modules.items() if key == "components" or key.startswith("components.")}
+    for length in (2, 7):
+        directory = tmp_path / str(length)
+        package = directory / "components"
+        package.mkdir(parents=True)
+        (package / "__init__.py").write_text("")
+        (package / "model.py").write_text(f"from opencad import Part\ndef build(): return Part().box({length}, 3, 4)\n")
+        script = directory / "model.py"
+        script.write_text("from components.model import build\nbuild()\n")
+        assert main(["run", str(script), "--backend", "analytic"]) == 0
+        context = get_default_context()
+        assert context.tree.nodes[context.last_feature_id].parameters["length"] == length
+    current = {key: value for key, value in sys.modules.items() if key == "components" or key.startswith("components.")}
+    assert current == previous

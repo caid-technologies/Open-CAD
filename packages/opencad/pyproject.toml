@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "opencad"
-version = "0.2.4"
+version = "0.2.5"
 description = "OpenCAD core — geometry kernel, constraint solver, feature tree, and fluent modelling API"
 readme = "README.md"
 license = "Apache-2.0"

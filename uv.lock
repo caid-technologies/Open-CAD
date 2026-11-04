@@ -1979,7 +1979,7 @@ wheels = [
 
 [[package]]
 name = "opencad"
-version = "0.2.3"
+version = "0.2.5"
 source = { editable = "packages/opencad" }
 dependencies = [
     { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
@@ -2054,7 +2054,7 @@ test = [
 
 [[package]]
 name = "opencad-agent"
-version = "0.2.3"
+version = "0.2.5"
 source = { editable = "packages/opencad-agent" }
 dependencies = [
     { name = "opencad" },
@@ -2084,7 +2084,7 @@ test = [{ name = "pytest", specifier = ">=8" }]
 
 [[package]]
 name = "opencad-backend"
-version = "0.2.3"
+version = "0.2.5"
 source = { editable = "apps/backend" }
 dependencies = [
     { name = "fastapi" },
